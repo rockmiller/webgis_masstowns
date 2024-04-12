@@ -1,0 +1,11 @@
+townPointsURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_towns_points.geojson";
+
+let townPoints;    
+fetch(townPointsURL).then(
+        function(u){ return u.json();}
+      ).then(
+        function(json){
+          townPoints = json;
+        }
+      )
+console.log(townPoints);

@@ -1,0 +1,63 @@
+//creating a button group as a DOM object:
+
+    <div class="btn-group">
+        <button type="button" id="allbus" class="btn btn-success">All</button>
+        <button type="button" id="others" class="btn btn-primary">Others</button>
+        <button type="button" id="cafes" class="btn btn-danger">Cafes</button>
+    </div>
+
+
+//this is the code inside the "then" part of the fetch statement
+
+{
+var allbusinesses = L.geoJson(data);
+                var cafes = L.geoJson(data, {
+            filter: function(feature, layer) {
+                return feature.properties.BusType == "Cafe";
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.marker(latlng, {
+                    icon: cafeIcon
+                }).on('mouseover', function() {
+                    this.bindPopup(feature.properties.Name).openPopup();
+                });
+            }
+        });
+        var others = L.geoJson(data, {
+            filter: function(feature, layer) {
+                return feature.properties.BusType != "Cafe";
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.marker(latlng, {
+                }).on('mouseover', function() {
+                    this.bindPopup(feature.properties.Name).openPopup();
+                });
+            }
+        });
+		
+		// this solves the offset problem - it focuses on the bounds of the visible layers
+		
+        map.fitBounds(allbusinesses.getBounds(), {
+            padding: [50, 50]
+        });
+		//here we are now adding the filtered layers to the map
+		
+        cafes.addTo(map)
+        others.addTo(map)
+		
+       
+        // referencing DOM objects in the button group
+		
+		$("#others").click(function() {
+            map.addLayer(others)
+            map.removeLayer(cafes)
+        });
+        $("#cafes").click(function() {
+            map.addLayer(cafes)
+            map.removeLayer(others)
+        });
+        $("#allbus").click(function() {
+            map.addLayer(cafes)
+            map.addLayer(others)
+        });
+    });
