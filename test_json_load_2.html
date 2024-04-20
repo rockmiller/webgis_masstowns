@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<title>JSON Load</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script src="https://unpkg.com/jquery"></script>
+
+<script src="leaflet.ajax.js"></script>
+
+<script src="https://unpkg.com/leaflet-providers@latest/leaflet-providers.js"></script>
+
+<script>
+
+stateBorderURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_state_border.geojson";
+townPointsURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_towns_points.geojson";
+
+var stateBorderStyle = {color:'grey', weight: 1, fillOpacity:0}
+var stateBorderStyleRed = {color:'red', weight: 1, fillOpacity:0}
+var pointStyleDefault = {radius: 2.5, color: 'grey', weight: 0.5, opacity: 0.8, fillcolor: 'grey', fillOpacity: 0.2 };
+var pointStyleOther = {radius: 3.5, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1 };
+
+range = [1610, 1700]
+
+</script>
+</head>
+
+<body>
+<h3>Test JSON Load</h3>
+
+<div id="map"></div>
+<style>
+#map { height: 500px; }
+</style>
+
+<div id="stateborder"></div>
+<div id="townpoints"></div>
+
+<script>
+var map = L.map('map').setView([42.26259, -71.80229],8);
+console.log('map created');
+
+var base = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_background/{z}/{x}/{y}{r}.{ext}?api_key=166a8804-2976-4723-9652-33257ce7d1e6', {
+	minZoom: 6, maxZoom: 12, opacity: 0.5,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+}).addTo(map);
+
+var stateBorderLayer = new L.geoJSON.ajax(stateBorderURL,{
+     style: stateBorderStyle} );
+console.log('state: ',stateBorderLayer);
+stateBorderLayer.addTo(map);
+
+var townsLayer = L.geoJson.ajax(townPointsURL, {
+        pointToLayer: function(feature, latlng) {
+        return L.circleMarker(latlng, pointStyleDefault)
+            .on('mouseover', function() {
+                    this.bindPopup(feature.properties.m_name + ' ('+feature.properties.m_yrsettled + ')').openPopup()});
+        }
+    }).addTo(map);
+
+console.log('towns: ',townsLayer);
+</script>
+</body>
+</html>

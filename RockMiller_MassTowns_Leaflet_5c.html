@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<title>Massachusetts Settlements (Rock Miller)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>.btn-default {width: 100px; height: 20px; padding: 1px}</style>
+<style>.textbox {width: 30px; height: 12px; padding: 1px}</style>
+
+<head>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script src="jquery-3.7.1.min.js"></script>
+<script src="leaflet-ajax.js"></script>
+<script src="https://unpkg.com/leaflet-providers@latest/leaflet-providers.js"></script>
+
+<script>
+//$.support.cors = true;
+
+stateBorderURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_state_border.geojson";
+townPointsURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_towns_points.geojson";
+
+var stateBorderStyle = {color:'grey', weight: 1, fillOpacity:0}
+var pointStyleDefault = {radius: 2, color: 'grey', weight: 0.5, opacity: 0.8, fillcolor: 'grey', fillOpacity: 0.2 };
+var pointStyleOther = {radius: 3.5, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1 };
+
+var timePeriods = [
+    {period: 1, legendText: 'Before 1630', startYr: 1600, endYr: 1630,style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'cornflowerblue', fillOpacity: 1}},
+    {period: 2, legendText: 'Settlement Period', startYr: 1630, endYr: 1642, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'cornflowerblue', fillOpacity: 1}},
+    {period: 3, legendText: 'Growth Period', startYr: 1642, endYr: 1675, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}},   
+    {period: 4, legendText: 'King Philips War', startYr: 1675, endYr: 1688, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 5, legendText: 'King William to Queen Anne', startYr: 1688, endYr: 1713, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 6, legendText: 'Queen Anne to King George', startYr: 1713, endYr: 1744, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 7, legendText: 'French and Indian Wars', startYr: 1744, endYr: 1763, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 8, legendText: 'Revolutionary Period', startYr: 1763, endYr: 1783, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 9, legendText: 'Post Revolution', startYr: 1783, endYr: 1815, style: {radius: 4, color: 'black', weight: 1, opacity: 1, fillColor: 'black', fillOpacity: 1}}
+];
+function selectTowns(range,map) {
+    selectTownsLayer = L.geoJson(null, {
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, pointStyleDefault)
+            .on('mouseover', function() {
+                    this.bindPopup(feature.properties.m_name + ' ('+feature.properties.m_yrsettled + ')').openPopup()});
+        }});
+    console.log('geojson layer created');
+    !async function(){
+        let data = await fetch(townPointsURL)
+            .then((response) => response.json())
+            .then(data => {
+                console.log(data);
+                return data;
+        })
+            .catch(error => {
+                console.error(error);
+        });
+    console.log('geojson fetched')
+    console.log(data);
+    selectTownsLayer.addData(data).addTo(map);
+}};
+</script>
+</head>
+
+<body>
+<h3>Massachusetts Settlement History</h3>
+
+<label for="startyear">From Years:</label>
+<input type="text" id="startyear" name="startyear" value = 1600 class="textbox" >
+<label for="endyear">To:</label>
+<input type="text" id="endyear" name="endyear" value = 1815 class="textbox" >&nbsp
+<button id="year_button" name="year_button" class="btn-default">Select Years</button>
+<br /><br />
+
+<div id="map"></div>
+<div id="stateborder"></div>
+<div id="townpoints"></div>
+
+<style>
+#map { height: 500px; }
+</style>
+
+<script>
+var map = L.map('map').setView([42.26259, -71.80229],8);
+console.log('map created');
+
+var btn = document.getElementById("year_button");
+console.log('button created');
+btn.addEventListener("click", function(event) {
+    console.log('button pressed');
+    //selectTownsLayer.remove();
+    range = [document.getElementById("startyear").value, document.getElementById("endyear").value];
+    console.log(range);
+    selectTowns(range,map);
+
+var base = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_background/{z}/{x}/{y}{r}.{ext}?api_key=166a8804-2976-4723-9652-33257ce7d1e6', {
+	minZoom: 6, maxZoom: 12, opacity: 0.5,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+}).addTo(map);
+
+var stateBorderLayer = new L.geoJSON.AJAX(null, {
+     style: stateBorderStyle}).addTo(map);
+
+var selectTownsLayer = new L.layerGroup([L.geoJson(null, {
+    pointToLayer: function(feature, latlng) {
+        return L.circleMarker(latlng, pointStyleOther)
+            .on('mouseover', function() {
+                    this.bindPopup(feature.properties.m_name + ' ('+feature.properties.m_yrsettled + ')').openPopup()});
+        }})]);
+
+
+
+//stateBorderLayer.addData(f1);
+//console.log(stateBorderLayer);
+
+//fetch(stateBorderURL)
+//  .then((response) => {
+//      return response.json();
+//      })
+//    .then((data) => {
+//      stateBorderLayer.addData(data);
+//    });
+
+});
+
+</script>
+</body>
+</html>
