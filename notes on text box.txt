@@ -1,0 +1,33 @@
+#myElement {
+  visibility: hidden;
+}
+This will hide the element, but it will still take up the same space it would if it were visible.
+
+Remember that elements with visibility set to hidden or collapse are still accessible via keyboard navigation and screen readers. If you want to hide content from all users, you might want to use the display property with the value of none.
+
+Use JavaScript to dynamically change the visibility of an element. This can be useful for creating interactive web pages. You can use the style property in JavaScript to access and modify the visibility of an HTML element.
+
+One common mistake is using the visibility property when you really want to remove an element from the layout. Remember, visibility hidden does not free up the space used by the element. In such cases, use display: none; instead.
+
+Another common error is assuming that setting visibility to hidden will hide the content from screen readers. This is not true. If you need to hide content in a way that it is inaccessible to all users, use display: none; or other techniques.
+
+Remember that elements with visibility set to hidden or collapse are still accessible via keyboard navigation and screen readers. If you want to hide content from all users, you might want to use the display property with the value of none.
+
+display: none (completely removes element)
+display: initial (returns to initial)
+display: block (display as paragraph)
+
+display: contents 	
+(Makes the container disappear, making the child elements children of the element the next level up in the DOM)
+
+STRATEGY
+
+(Maybe set up a <div id=textpassages> to hold all the text passages individually as child nodes (identifiers based on periods). Visibility is hidden for this element). Assume these identifiers are accessible through Javascript.
+
+Button logic to go forward and backward and reference child nodes based on Period and child node identifier (array of identifiers). Keeping track of current identifier, add or subtract values.
+
+On button press, change the visibility (possibly the display property, or the visibility property) of the 
+
+On button press, replace the current text of the "history" element with text from the selected child node (TextContent, innerHTML). 
+
+Or, possibly, all of the text passages can be kept as child nodes or otherwise as separate pieces in the "history" element and their visibility status changed. 

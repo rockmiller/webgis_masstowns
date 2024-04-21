@@ -1,0 +1,12 @@
+function mapPoints(layer, fromYr, toYr) {
+    layer.addData(townPoints, {
+    pointToLayer: function(feature, latlng) {
+        yr = feature.properties.m_yrsettled
+        ct = feature.properties.m_category
+        if (yr >= toYr || yr < fromYr) return L.circleMarker(latlng, pointStyleDefault)
+        else return L.circleMarker(latlng, pointStyleOther)},
+            onEachFeature: onEachFeatureFn}).addTo(map)}
+
+
+fetchUsers().then(items => setUsers(items))
+fetchUsers().then((result) => setUsers(result));
