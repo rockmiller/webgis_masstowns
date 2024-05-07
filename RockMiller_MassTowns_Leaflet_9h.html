@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<title>Massachusetts Settlements (Rock Miller)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>.textbox {width: 60px; height: 20px; padding: 1px}</style>
+<head>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+<link rel="import" href="masstowns_text_div1.html">
+<link rel="import" href="masstowns_text_div2.html">
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script src="https://unpkg.com/jquery"></script>
+
+<script src="leaflet.ajax.js"></script>
+
+<script src="https://unpkg.com/leaflet-providers@latest/leaflet-providers.js"></script>
+
+<link rel="stylesheet" href="leaflet.legend.css">
+<script src="leaflet.legend.js"></script>
+
+
+<style>
+.w3-container {
+    line-height: 1.2;
+    padding: 10px;
+}
+.flex-container {
+  display: flex;
+  height: 600px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-content: space-around;
+  align-items: start;
+}
+p {
+    font-family: Verdana, sans-serif;
+    font-size: 15px;
+    text-align: left;
+    line-height: 1.4;
+}
+h3 {
+    text-align: left;
+    line-height: 1;
+}
+h4 {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: left;
+    line-height: 1.2;
+}
+h5 {
+  text-align: left;
+  line-height: 1;
+}
+
+.story {
+  display: contents;
+  border: 2px solid black;
+  background-color: white;
+  padding: 10px;
+  width: 200px;
+  text-align: left;
+}
+
+</style>
+
+<script>
+stateBorderURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_state_border.geojson";
+townPointsURL = "https://raw.githubusercontent.com/rockmiller/masstowns/main/mass_towns_points.geojson";
+
+var stateBorderStyle = {color:'grey', weight: 1, fillOpacity:0}
+var pointStyleDefault = {radius: 3, color: 'black', weight: 0.4, opacity: 0.5, fillcolor: 'black', fillOpacity: 0.8};
+var pointStyleOther = {radius: 1, color: 'black', weight: 0.4, opacity: 1, fillColor: 'grey', fillOpacity: 0.7};
+
+var townNameCats = [
+    {nameCat: 'Eastern England', legend: 'East', style: {radius: 3, color: 'dodgerblue', weight: 0.7, opacity: 1, fillColor: 'dodgerblue', fillOpacity: 1}},
+    {nameCat: 'South England', legend: 'South', style: {radius: 3, color: 'darkorange', weight: 1, opacity: 1, fillColor: 'darkorange', fillOpacity: 1}},
+    {nameCat: 'London', legend: 'London', style: {radius: 3, color: 'darkorange', weight: 1, opacity: 1, fillColor: 'darkorange', fillOpacity: 1}},
+    {nameCat: 'SW England', legend: 'West', style: {radius: 3, color: 'deeppink', weight: 1, opacity: 1, fillColor: 'deeppink', fillOpacity: 1}},
+    {nameCat: 'Midlands', legend: 'Midlands', style: {radius: 3, color: 'green', weight: 1, opacity: 1, fillColor: 'green', fillOpacity: 1}},
+    {nameCat: 'North England', legend: 'North', style: {radius: 3, color: 'purple', weight: 1, opacity: 1, fillColor: 'purple', fillOpacity: 1}},
+    {nameCat: 'Scotland', legend: 'North', style: {radius: 3, color: 'purple', weight: 1, opacity: 1, fillColor: 'purple', fillOpacity: 1}},
+    {nameCat: 'Ireland', legend: 'North', style: {radius: 3, color: 'purple', weight: 1, opacity: 1, fillColor: 'purple', fillOpacity: 1}},
+    {nameCat: 'Wales', legend: 'West', style: {radius: 3, color: 'pink', weight: 1, opacity: 1, fillColor: 'pink', fillOpacity: 1}},
+    {nameCat: 'Native', legend: 'Native', style: {radius: 3, color: 'black', weight: 1.2, opacity: 1, fillColor: 'lightgrey', fillOpacity: 1}},
+    {nameCat: 'Biblical', legend: 'Biblical', style: {radius: 3, color: 'black', weight: 1.2, opacity: 1, fillColor: 'lightgrey', fillOpacity: 1}},
+    {nameCat: null, legend: 'None', style: {radius: 2, color: 'grey', weight: 0, opacity: 1, fillColor: 'white', fillOpacity: 1}}
+]
+var timePeriods = [
+    {period: 1, legendText: 'Settlement (1620-1629)', years: [1620, 1629], style: {radius: 3, color: 'black', weight: 1.1, opacity: 1.2, fillColor: 'black', fillOpacity: 1}},
+    {period: 2, legendText: 'Settlement (1630-1642)', years: [1630, 1642], style: {radius: 3, color: 'black', weight: 1.1, opacity: 1, fillColor: 'black', fillOpacity: 0.8}},
+    {period: 3, legendText: 'Settlement (1643-1675)', years: [1643, 1675], style: {radius: 3, color: 'black', weight: 1.1, opacity: 1, fillColor: 'black', fillOpacity: 0.7}},
+    {period: 4, legendText: 'Settlement (1676-1712)', years: [1676,1712], style: {radius: 3, color: 'black', weight: 1.2, opacity: 0.9, fillColor: 'black', fillOpacity: 1}},   
+    {period: 5, legendText: 'Settlement (1713-1744)', years: [1713,1744], style: {radius: 3, color: 'black', weight: 1.1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 6, legendText: 'Settlement (1745-1753)', years: [1745,1753], style: {radius: 3, color: 'black', weight: 1.2, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 7, legendText: 'Settlement (1754-1763)', years: [1754,1763], style: {radius: 3, color: 'black', weight: 1.1, opacity: 1, fillColor: 'black', fillOpacity: 1}},
+    {period: 8, legendText: 'Settlement (1764-1787)', years: [1764,1787], style: {radius: 3, color: 'black', weight: 1.2, opacity: 1, fillColor: 'black', fillOpacity: 0.8}}
+]
+var curSeq = 1
+var maxSeq = 7
+
+var pageObj = [
+    {seq: 1, divcode:'t1',title:'The Great Puritan Migration', years: [1620, 1629]},
+    {seq: 2, divcode:'t2',title:'The Settlement Period (1620-1642)', years: [1620, 1642]},
+    {seq: 3, divcode:'t3',title:'Growth and Increase (1643-1675)', years: [1643, 1675]},
+    {seq: 4, divcode:'t4',title:'War and Aftermath (1676-1712)', years: [1676, 1712]},
+    {seq: 5, divcode:'t5',title:'Western Settlement(1713-1753)', years: [1713, 1753]},
+    {seq: 6, divcode:'t6',title:'Colonial and Revolutionary Wars (1754-1787)', years: [1754, 1787]},
+    {seq: 7, divcode:'t7',title:'Summary of Population Growth', years: [1620, 1787]}
+]
+var LegendItems = {
+            position: 'bottomleft',
+            //controlButton: {title: "Legend"},
+            title: null,
+            collapsed: false,
+            symbolheight: 20,
+            symbolwidth: 20,
+            opacity: 0.8,
+            column: 2,
+            legends: 
+            [{
+                label: "East",
+                type: "circle",
+                radius: 3,
+                color: "dodgerblue",
+                fillColor: "dodgerblue",
+                fillOpacity: 1,
+                weight: 0.5
+            },{
+                label: "South",
+                type: "circle",
+                radius: 3,
+                color: "darkorange",
+                fillColor: "darkorange",
+                fillOpacity: 1,
+                weight: 0.5
+            },{
+                label: "West",
+                type: "circle",
+                radius: 3,
+                color: "deeppink",
+                fillColor: "deeppink",
+                fillOpacity: 1,
+                weight: 0.5
+            },{
+                label: "Midlands",
+                type: "circle",
+                radius: 3,
+                color: "#3cb371",
+                fillColor: "#3cb371",
+                fillOpacity: 1,
+                weight: 0.5
+            },{
+                label: "North",
+                type: "circle",
+                radius: 3,
+                color: "purple",
+                fillColor: "purple",
+                fillOpacity: 1,
+                weight: 0.5
+            },{
+                label: "Native/Biblical",
+                type: "circle",
+                radius: 3,
+                color: "black",
+                fillColor: "lightgrey",
+                fillOpacity: 1,
+                weight: 1.2
+            }]
+};
+
+var leg = new L.Control.Legend(LegendItems);
+
+function clearPoints(map){
+    townsLayer.eachLayer(l => {
+        l.removeFrom(map);
+})};
+function resetPoints(map){
+    townsLayer.eachLayer(l => {
+        l.setStyle(pointStyleOther);
+        l.addTo(map);
+    })};
+
+function defaultTowns(range, map) {
+    townsLayer.eachLayer(l => {
+        if(l.feature.properties.m_yrsettled >= yearRange[0] && l.feature.properties.m_yrsettled <=yearRange[1]) 
+        {l.setStyle(pointStyleDefault);
+            l.addTo(map);} 
+        else {l.removeFrom(map);}
+})};
+function selectPeriods(range, map) {
+    townsLayer.eachLayer(l => {
+        if(l.feature.properties.m_yrsettled >= yearRange[0] && l.feature.properties.m_yrsettled <=yearRange[1]) 
+        {a = stylePeriods(l.feature.properties.m_yrsettled);
+            l.setStyle(a);
+            l.bindPopup(l.feature.properties.m_name + " (" + l.feature.properties.m_yrsettled + ")");
+            l.addTo(map);} 
+        else {l.removeFrom(map);}
+})};
+
+function stylePeriods(year) {
+    for (let i of timePeriods) {
+        if (year >= i.years[0] && year <= i.years[1]) { 
+            //console.log(year, 'in range', i.period, i.style);
+            return i.style}
+        else {continue;}
+    }};
+
+function selectTowns(range, map) {
+    townsLayer.eachLayer(l => {
+        if(l.feature.properties.m_yrsettled >= yearRange[0] && l.feature.properties.m_yrsettled <=yearRange[1])
+            {b = styleTowns(l.feature.properties.m_category);
+            l.setStyle(b);
+            l.bindPopup(l.feature.properties.m_name + " (" + l.feature.properties.m_yrsettled + ")");
+            l.addTo(map);} 
+        else {l.removeFrom(map);}
+})};
+function styleTowns(category) {
+    for (i of townNameCats) {        
+        if (category == i.nameCat) {
+            s = i.style;
+            //console.log(i.nameCat,'-', i.style);      
+            return s;}
+        else {continue;}
+}};
+
+function setCurSeq(seq, direction) {
+    switch (direction) {
+        case 1:
+            if (seq >=1 && seq < maxSeq) {seq = seq + 1} else {seq = 1};
+            break;
+        case -1:
+            if (seq > 1 && seq <= maxSeq) {seq = seq - 1} else {seq = 1};
+            break;
+        default:
+            seq = 1;
+}
+return seq;
+};
+
+function refreshText(seq) {
+    let yrs = []
+    for (i of pageObj) {
+        if (i.seq == seq) {
+            document.getElementById(i.divcode).style.display = 'block';
+            yrs = i.years}
+        else {
+            document.getElementById(i.divcode).style.display = 'none';}
+}
+return yrs;
+};
+
+</script>
+</head>
+<body class="w3-container w3-auto">
+<div class="w3-container w3-dark-grey">
+    <h3>Township Settlement in Massachusetts</h3>
+</div><br />
+
+<div class="flex-container">
+    <div style="flex: 4 4 800px">
+
+<label for="startyear">From Years:</label>
+<input type="text" id="startyear" name="startyear" value = 1620 class="textbox" >
+<label for="endyear">To:</label>
+<input type="text" id="endyear" name="endyear" value = 1629 class="textbox" >&nbsp
+<!--<div class="w3-container">-->
+<input id = "year_button" name = "year_button" type="button" class="w3-button w3-blue w3-Medium" value="Select Years">
+<input id = "town_button" name = "town_button" type="button" class="w3-button w3-green w3-Medium" value="Select Names">&nbsp
+<input id = "reset_button" name = "reset_button" type="button" class="w3-button w3-dark-grey w3-Medium" value="Reset Map"><br/>&nbsp
+<!--</div>-->
+
+<div id="map"></div>
+<style>
+#map { height: 500px;
+        width: 720px; }
+</style>
+
+<script>
+var map = L.map('map', {center: [42.26259, -71.80229], zoom: 8,attributionControl:false});
+// buttons formerly here
+
+
+// end of buttons
+
+var base = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_background/{z}/{x}/{y}{r}.{ext}?api_key=166a8804-2976-4723-9652-33257ce7d1e6', {
+	minZoom: 6, maxZoom: 12, opacity: 0.5,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+}).addTo(map);
+
+var stateBorderLayer = new L.geoJSON.ajax(stateBorderURL,{
+     style: stateBorderStyle} );
+console.log('state: ',stateBorderLayer);
+stateBorderLayer.addTo(map);
+
+var townsLayer = new L.geoJson.ajax(townPointsURL, {
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, pointStyleOther);
+        onEachFeature: (f, l) => {
+          l.bindPopup(f.properties.m_name + " (" + f.properties.m_yrsettled + ")");
+    }}});
+
+console.log('town: ',townsLayer);
+townsLayer.addTo(map);
+
+var btn1 = document.getElementById("year_button");
+btn1.addEventListener("click", function(event) {
+    yearRange = [document.getElementById("startyear").value, document.getElementById("endyear").value];
+    console.log('btn1',yearRange);
+    leg.remove();
+    resetPoints(map);
+    selectPeriods(yearRange,map);
+});
+//new button position
+var btn2 = document.getElementById("town_button");
+btn2.addEventListener("click", function(event) {
+    console.log('Towns button pressed');
+    yearRange = [document.getElementById("startyear").value, document.getElementById("endyear").value];
+    console.log('btn2',yearRange);
+    resetPoints(map);
+    selectTowns(yearRange,map);
+    leg.addTo(map);
+});
+
+var btn5 = document.getElementById("reset_button");
+btn5.addEventListener("click", function(event) {
+    console.log('Reset button pressed');
+    map.fitBounds(stateBorderLayer.getBounds() );
+    //map.setZoom(8)
+    //map.setView([42.26259, -71.80229]);
+    //
+});
+//end of new button position
+
+</script>
+</div>
+
+<div id=t1 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: block;">
+<h4>The Great Puritan Migration</h4>
+<p>The Great Migration to the New England colonies (1630-1642) was one of the most important founding events in the history of the United States. Called Puritans by their detractors (they called themselves the Godly), the migrants had a distinctive religious practice centered on self-driven moral effort within a purified community. This left a legacy in a society that became the seedbed of revolution and the nation's first center of intellectual culture. Their religious belief in community responsibility for educating both boys and girls became the foundation of the public schools; their emphasis on intellectual training of ministers, the wellspring of the nation’s universities. </p>
+<br/>
+</div> 
+
+<div id=t2 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: none;">
+<h4>The Settlement Period (1620-1642) </h4>
+<p>A religious crisis grew in England after the accession of King Charles I in 1625. The wealthy and influential Calvinist community began to seek an overseas haven to preserve their religion should civil war overtake the country. They founded the Massachusetts Bay Company to support a highly organized colonization effort. The first fleet of eleven ships, with a thousand people, landed at Salem in 1630. They quickly established their central settlement, which they called Boston after the English headquarters of their enterprise and created 80 townships in the periphery. These were distinctive communities embracing village and country, that were settled compactly by small groups of farmers, reproducing the same patterns and institutions. They were typically named after English towns from which the colonists had migrated. </p>
+<br/>
+</div>
+
+<div id=t3 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: none;">
+<h4>Growth and Increase (1643-1675) </h4>
+<p>The colonization effort ended with the English Civil War, which broke out in 1642. In the preceding twelve years, about 20,000 people had emigrated to the New England colonies. They came mostly in family groups and they produced large families, so the population continued to increase rapidly and townships continued to be formed even after colonization was ended. Between 1643 and 1675, an additional 94 settlements filled the lowland regions of what is now Massachusetts, as the population grew to about 37,000. These new settlements were established in a compact pattern extending from the borders of previous settlement in a radius of about 40 miles from Boston, and also in the low-lying Connecticut River valley to the west.</p>
+<br/>
+</div>
+
+<div id=t4 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: none;">
+<h4>Metacomet's War (1676-1712) </h4>
+<p>The newcomers had established themselves with the help of the Native peoples, but the rapid expansion of the colony's population put increasing pressure on this relationship and produced many occasions of conflict. In 1675, a war of exceptional violence broke out between the largest of them, the Wampanoag (led by their chieftain Metacomet) and the colonists with their Native allies. This resulted in extensive destruction (with hundreds of deaths) in the New England colonies. After two years of war, the colonists prevailed and Native power was destroyed. But the pace of settlement slackened as population growth slowed. The 34 townships established in this period were founded within or close to areas of previous settlement. </p>
+<br/>
+</div>
+    
+<div id=t5 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: none;">
+<h4>Western Settlement (1713-1753) </h4>
+<p>A second burst of settlement took place in the relatively peaceful period that followed the end of Queen Anne’s War in 1713. In this period, population increased from about 80,000 to 200,000, and 86 townships were settled in the highlands, both in the area between the Bay Colony and the Connecticut River settlements, and in parts of the western highlands near the New York border. Unlike previous settlements, these new townships were scattered rather than compact, covering most of the western territories, an area of more than 1600 square miles.</p>
+<br/>
+</div>
+    
+<div id=t6 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: none;">
+<h4>War and Revolution (1754-1787)</h4>
+<p>The period from 1754 to 1787 was a period of almost continuous war as the great power competition of England and France came to a head. These events led to a great deal of frontier warfare and heavy calls on New England manpower. Between 1754 and 1763, the French and Indian War drove compact settlement in the western mountains, establishing both civil and military presence in those contested areas. The population continued to expand rapidly through this period, from 200,000 to 270,000 over ten years. The period between the end of the war in 1763 and the revolution in 1775 saw more 13 more settlements in the Westfield River valley and the northwestern mountains. By 1790, all areas of the state had been settled, and the population was 475,000.</p>
+<br/>
+</div>
+<div id=t7 style="flex: 1 1 400px; padding: 1rem; padding-top: 0rem; box-sizing: border-box; display: none;">
+    <h4>Summary</h4>
+    <p></p>
+<br/>
+</div>
+
+</div>
+
+<!--<footer class="w3-container w3-white"></footer>-->
+
+<style>
+    div.pn_pos {
+    position: relative;
+    right: 30px;
+}
+</style>
+<div class="pn_pos"></div>
+<input id = "prev_button" name = "prev_button" type="button" class="w3-button w3-red w3-Medium" value="Prev" style="margin-top:10px; position:relative; bottom:100px; left:740px">&nbsp
+<input id = "next_button" name = "next_button" type="button" class="w3-button w3-red w3-Medium" value="Next"style="margin-top:10px; position:relative; bottom:100px; left:740px">&nbsp   
+<script>
+
+var btn3 = document.getElementById("prev_button");
+    btn3.addEventListener("click", function(event) {
+        console.log('prior',curSeq)
+        curSeq = setCurSeq(curSeq, -1)
+        console.log('prev',curSeq);      
+        yearRange = refreshText(curSeq);
+        document.getElementById("startyear").value = yearRange[0];
+        document.getElementById("endyear").value = yearRange[1];
+        console.log('btn3',yearRange);
+        leg.remove();
+        resetPoints(map);
+        selectPeriods(yearRange,map);
+});
+var btn4 = document.getElementById("next_button");
+    btn4.addEventListener("click", function(event) {
+        console.log(curSeq)
+        curSeq = setCurSeq(curSeq, 1)
+        console.log('next', curSeq);
+        yearRange = refreshText(curSeq);
+        document.getElementById("startyear").value = yearRange[0];
+        document.getElementById("endyear").value = yearRange[1];
+        console.log('btn4',yearRange);
+        leg.remove();
+        resetPoints(map);
+        selectPeriods(yearRange,map);
+    });  
+
+</script>
+</body>
+</html>

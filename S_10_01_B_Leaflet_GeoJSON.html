@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GeoJSON tutorial - Leaflet</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://edihasaj.github.io/leaflet-coord-projection/coord-projection.css" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+        integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+    <script src="./js/leaflet-providers.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.0/proj4.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
+    <script type="text/javascript"
+        src="https://edihasaj.github.io/leaflet-coord-projection/coord-projection.js"></script>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+
+    <link rel="stylesheet" href="./css/Control.FullScreen.css" />
+    <script src="./js/Control.FullScreen.js"></script>
+
+    <link rel="stylesheet" href="./css/leaflet-search.css" />
+    <script src="./js/leaflet-search.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@latest/dist/geosearch.css" />
+
+    <!-- Make sure you put this AFtER leaflet.js, when using with leaflet -->
+    <script src="https://unpkg.com/leaflet-geosearch@latest/dist/geosearch.umd.js"></script>
+
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
+    <link href="./css/Ex_10_01.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map("map", {
+            maxZoom: 9,
+            zoomDelta: 1,
+            zoomControl: true,
+            fullscreenControl: true,
+            fullscreenControlOptions: {
+                position: "topleft",
+            },
+        }).setView([39.74739, -97], 5);
+
+        var baseLayer = L.tileLayer.provider("Esri.WorldStreetMap").addTo(map);
+        var baseLayer2 = L.tileLayer.provider("OpenStreetMap.Mapnik");
+
+        L.control
+            .coordProjection({
+                separator: "  ",
+                lngFirst: true,
+                prefix: "",
+            })
+            .addTo(map);
+
+        function onEachFeatureFn(feature, layer) {
+            var popupContent =
+                "<p>Feature Type: " +
+                feature.geometry.type +
+                "</br> ID: " +
+                feature.properties.GEO_ID +
+                "</br> Name: " +
+                feature.properties.NAME +
+                "</p>";
+
+            if (feature.properties && feature.properties.popupContent) {
+                popupContent += feature.properties.popupContent;
+            }
+
+            layer.bindPopup(popupContent);
+
+            layer.on({
+                mouseover: function (e) {
+                    e.target.setStyle({ fillColor: "#994400" });
+                    e.target.openPopup();
+                },
+                mouseout: (e) => {
+                    USstatesLayer.resetStyle(e.target);
+                    e.target.closePopup();
+                },
+            });
+        }
+
+        var USstatesLayer = L.geoJSON(null, {
+            style: (feature) => {
+                return { color: "#000", fill: "#ccc", fillOpacity: 0.2 };
+            },
+            onEachFeature: onEachFeatureFn,
+        }).addTo(map);
+        /*
+                          $.getJSON("./gz_2010_us_040_00_5m.json", function (data) {
+            
+                              console.log(data);
+                              console.log(data.features.length);
+            
+                              // Do NOT create the GeoJSON layer here.
+                              // Create it outside and then fill the data
+                              USstatesLayer.addData(data);
+                          });
+            */
+        function highightState(stName, gjL) {
+            gjL.eachLayer(function (layer) {
+                //layer.bindPopup('Hello');
+                if (layer.feature.properties.NAME == stName) {
+                    layer.setStyle({ fillColor: "#222" });
+                }
+            });
+        }
+
+        var USstatesLayerB = L.geoJSON(null, {
+            onEachFeature: (f, l) => {
+                l.setStyle({ color: "#888" });
+
+                l.on({
+                    mouseover: function (e) {
+                        e.target.setStyle({ fillColor: "#111", weight: 2 });
+                    },
+                    mouseout: (e) => {
+                        USstatesLayerB.resetStyle(e.target);
+                        e.target.setStyle({ color: "#888" });
+                    },
+                });
+            },
+            filter: (f) => f.properties.CENSUSAREA > 50000,
+        });
+        //.addTo(map); // if the layer is not added to the map, it will not be open in the begining.
+
+        fetch("./gz_2010_us_040_00_5m.json")
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+                USstatesLayer.addData(data);
+
+                var maxVal = -Infinity,
+                    minVal = Infinity;
+
+                data.features.forEach((f, i) => {
+                    if (
+                        f.properties.NAME != "Alaska" &&
+                        f.properties.NAME != "Hawaii"
+                    ) {
+                        maxVal = Math.max(maxVal, f.properties.CENSUSAREA);
+                        minVal = Math.min(minVal, f.properties.CENSUSAREA);
+                    }
+                });
+
+                var valRange = maxVal - minVal;
+
+                USstatesLayerB.options.style = (f) => {
+                    return {
+                        fillColor: d3.interpolateOranges(
+                            (f.properties.CENSUSAREA - minVal) / valRange
+                        ),
+                        //color: "#fff",
+                        weight: 1,
+                        fillOpacity: 0.8,
+                    };
+                };
+
+                USstatesLayerB.addData(data);
+            });
+
+        var baseMaps = {
+            ESRI: baseLayer,
+            OpenStreetMap: baseLayer2,
+        };
+
+        var overlayMaps = {
+            "States A": USstatesLayer,
+            "<strong>States B</strong><ul><li>Legend 1</li><li>Legend 2</li></ul>": USstatesLayerB,
+        };
+
+        var lC = L.control
+            .layers(baseMaps, overlayMaps, {
+                collapsed: false,
+                hideSingleBase: true,
+            })
+            .addTo(map)
+            .expand();
+
+        var lcDIVElem = lC.getContainer();
+        document.addEventListener("keydown", (e) => {
+            if ((e.key === "l") | (e.key === "L")) {
+                if (lcDIVElem.style.display == "") {
+                    lcDIVElem.style.display = "none";
+                } else {
+                    lcDIVElem.style.display = "";
+                }
+            }
+        });
+
+        var searchControl = new L.Control.Search({
+            layer: USstatesLayer,
+            propertyName: 'NAME',
+            position: 'topright',
+            marker: false,
+            moveToLocation: function (latlng, title, map) {
+                //map.fitBounds( latlng.layer.getBounds() );
+                let zoom = map.getBoundsZoom(latlng.layer.getBounds());
+                map.setView(latlng, zoom); // access the zoom
+            }
+        });
+
+        searchControl.on('search:locationfound', function (e) {
+
+            //console.log('search:locationfound', );
+
+            //map.removeLayer(this._markerSearch)
+            e.layer.setStyle({ fillColor: '#3f0', color: '#0f0' });
+            if (e.layer._popup)
+                e.layer.openPopup();
+
+        }).on('search:collapsed', function (e) {
+
+            featuresLayer.eachLayer(function (layer) {	//restore feature color
+                featuresLayer.resetStyle(layer);
+            });
+        });
+
+        map.addControl(searchControl);  //inizialize search control
+
+        map.addControl(new L.Control.Search({
+            url: 'https://nominatim.openstreetmap.org/search?format=json&q={s}&countrycodes=us',
+            position: 'topleft',
+            jsonpParam: 'json_callback',
+            propertyName: 'display_name',
+            propertyLoc: ['lat', 'lon'],
+            marker: L.circleMarker([0, 0], { radius: 30 }),
+            autoCollapse: true,
+            autoType: false,
+            minLength: 2,
+            container: '',
+            moveToLocation: function (latlng, title, map) {
+                //map.fitBounds( latlng.layer.getBounds() );
+                let zoom = 12; //map.getBoundsZoom(latlng.layer.getBounds());
+                map.setView(latlng, zoom); // access the zoom
+            }
+        }));
+
+        const geosearchCtrl = new GeoSearch.GeoSearchControl({
+            provider: new GeoSearch.OpenStreetMapProvider({
+                params: {
+                    'accept-language': 'en', // render results in English
+                    'countrycodes': 'us', // limit search results to the us
+                    'addressdetails': 0, // include additional address detail parts
+                    'limit': 5,
+                    'viewbox':'-81, 40, -71.5, 45.2',
+                    'bounded': 1,
+                },
+            }),
+            position: "topright",
+            style: 'bar',
+            marker: {
+                // optional: L.Marker    - default L.Icon.Default
+                icon: new L.Icon.Default(),
+                draggable: false,
+            },
+        });
+
+        map.addControl(geosearchCtrl);
+
+        map.on('geosearch/showlocation', (rslt) => {
+            let latlng = [rslt.location.y, rslt.location.x];
+            USstatesLayer.eachLayer((l) => {
+                let pt = turf.point([rslt.location.x, rslt.location.y]);
+
+                if (turf.booleanPointInPolygon(pt, l.feature)) {
+                    map.fitBounds(l.getBounds());
+                    l.setStyle({ color: '#F00' })
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>
