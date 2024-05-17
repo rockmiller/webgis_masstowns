@@ -122,31 +122,31 @@ var townNameCats = [
     {nameCat: null, legend: 'None', style: {radius: 2, color: 'grey', weight: 0, opacity: 1, fillColor: 'white', fillOpacity: 1}}
 ]
 var timePeriods = [
-    {seq: 1, label: '(1620-1629)', years: [1620,1629],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'black', fillOpacity: 1}},
-    {seq: 2, label: '(1630-1642)', years: [1630,1642],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'cornflowerblue', fillOpacity: 1}},
-    {seq: 3, label: '(1643-1675)', years: [1643,1675],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'darkred', fillOpacity: 0.9}},
-    {seq: 4, label: '(1676-1712)', years: [1676,1712],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'indianred', fillOpacity: 1}},   
-    {seq: 5, label: '(1713-1753)', years: [1713,1753],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'SeaGreen', fillOpacity: 1}},
-    {seq: 6, label: '(1754-1775)', years: [1754,1775],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'yellow', fillOpacity: 1}},
-    {seq: 7, label: '(1776-1790)', years: [1776,1790],style: {radius: 3, color: 'darkgrey', weight: 0, opacity: 1, fillColor: 'lightyellow', fillOpacity: 1}}
+    {seq: 1, label: '(1620-1629)', years: [1620,1629],style: {radius: 3, color: 'darkgrey', weight: 1.1, opacity: 1, fillColor: 'purple', fillOpacity: 0.8}},
+    {seq: 2, label: '(1630-1642)', years: [1630,1642],style: {radius: 3, color: 'darkgrey', weight: 1.1, opacity: 1, fillColor: 'blue', fillOpacity: 1}},
+    {seq: 3, label: '(1643-1675)', years: [1643,1675],style: {radius: 3, color: 'darkgrey', weight: 1.1, opacity: 1, fillColor: 'blue', fillOpacity: 0.5}},
+    {seq: 4, label: '(1676-1712)', years: [1676,1712],style: {radius: 3, color: 'darkgrey', weight: 1.1, opacity: 1, fillColor: 'darkgreen', fillOpacity: 1}},   
+    {seq: 5, label: '(1713-1753)', years: [1713,1753],style: {radius: 3, color: 'darkgrey', weight: 1.1, opacity: 1, fillColor: 'darkred', fillOpacity: 0.9}},
+    {seq: 6, label: '(1754-1775)', years: [1754,1775],style: {radius: 3, color: 'darkgrey', weight: 1.2, opacity: 1, fillColor: 'yellow', fillOpacity: 1}},
+    {seq: 7, label: '(1776-1790)', years: [1776,1790],style: {radius: 3, color: 'darkgrey', weight: 1.2, opacity: 1, fillColor: 'yellow', fillOpacity: 1}}
 ];
 var table7data = [
     {id: 1, period: '(1620-1629)', years: [1620,1629], numyrs: 9, towns: 17, perYear:1.9},
-    {id: 2, period: '(1630-1642)', years: [1620,1642], numyrs: 12, towns: 80, perYear:6.7},  
-    {id: 3, period: '(1643-1675)', years: [1620,1675], numyrs: 32, towns: 94, perYear:2.9},
-    {id: 4, period: '(1676-1712)', years: [1620,1712], numyrs: 36, towns: 34, perYear:0.9},
-    {id: 5, period: '(1713-1753)', years: [1620,1753], numyrs: 40, towns: 86, perYear:2.2},
-    {id: 6, period: '(1754-1775)', years: [1620,1775], numyrs: 21, towns: 31, perYear:1.5},
-    {id: 7, period: '(1776-1790)', years: [1620,1790], numyrs: 14, towns: 6, perYear:0.4},
+    {id: 2, period: '(1630-1642)', years: [1630,1642], numyrs: 12, towns: 80, perYear:6.7},  
+    {id: 3, period: '(1643-1675)', years: [1643,1675], numyrs: 32, towns: 94, perYear:2.9},
+    {id: 4, period: '(1676-1712)', years: [1676,1712], numyrs: 36, towns: 34, perYear:0.9},
+    {id: 5, period: '(1713-1753)', years: [1713,1753], numyrs: 40, towns: 86, perYear:2.2},
+    {id: 6, period: '(1754-1775)', years: [1754,1775], numyrs: 21, towns: 31, perYear:1.5},
+    {id: 7, period: '(1776-1790)', years: [1776,1790], numyrs: 14, towns: 6, perYear:0.4},
 ];
 var pageObj = [
     {seq: 1, divcode:'t1',title:'The Great New England Migration', years: [1620, 1629]},
-    {seq: 2, divcode:'t2',title:'The Settlement Period (1620-1642)', years: [1630, 1642]},
+    {seq: 2, divcode:'t2',title:'The Settlement Period (1620-1642)', years: [1620, 1642]},
     {seq: 3, divcode:'t3',title:'Growth and Increase (1643-1675)', years: [1643, 1675]},
     {seq: 4, divcode:'t4',title:'War and Aftermath (1676-1712)', years: [1676, 1712]},
     {seq: 5, divcode:'t5',title:'Western Settlement(1713-1753)', years: [1713, 1753]},
     {seq: 6, divcode:'t6',title:'War and Revolution (1754-1775)', years: [1754, 1775]},
-    {seq: 7, divcode:'t7',title:'Rates of Settlement (1776-1775)', years: [1620,1620]}
+    {seq: 7, divcode:'t7',title:'Rates of Settlement (1776-1790)', years: [1620,1790]}
 ]
 var curSeq = 1
 var maxSeq = 7
@@ -247,17 +247,6 @@ function stylePeriods(year) {
             return i.style}
         else {continue;}
     }};
-
-function selectTableRow(range, map) {
-    townsLayer.eachLayer(l => {
-        l.setStyle(pointStyleOther)
-        if(l.feature.properties.m_yrsettled >= yearRange[0] && l.feature.properties.m_yrsettled <=yearRange[1]) 
-        {a = stylePeriods(l.feature.properties.m_yrsettled);
-            l.setStyle(a);
-            l.bindPopup(l.feature.properties.m_name + " (" + l.feature.properties.m_yrsettled + ")");
-            l.addTo(map);} 
-        else {l.setStyle(pointStyleOther).addTo(map);}
-})};
 
 function selectTowns(range, map) {
     townsLayer.eachLayer(l => {
@@ -367,6 +356,7 @@ btn1.addEventListener("click", function(event) {
 });
 var btn2 = document.getElementById("town_button");
 btn2.addEventListener("click", function(event) {
+    console.log('Towns button pressed');
     yearRange = [document.getElementById("startyear").value, document.getElementById("endyear").value];
     console.log('btn2',yearRange);
     resetPoints(map);
